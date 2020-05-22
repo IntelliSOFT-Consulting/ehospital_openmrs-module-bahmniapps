@@ -8,11 +8,12 @@
         </ul>
         <div class="reg-header-right fr">
             <div ui-view="headerExtension" class="print-action-items fl"></div>
-
+           
             <button class="btn-user-info fr">
                 <i class="fa fa-user-md fa-white small"></i>
                 <i class="fa fa-caret-down fa-white mini"></i>
             </button>
+            
             <ul>
                 <li>
                     <a><i class="fa fa-user fa-white small"></i><span>{{:: currentUser.username}}</span></a>
@@ -24,5 +25,8 @@
                     <a log-out><i class="fa fa-power-off fa-white small"></i><span class="nav-link">{{::'REGISTRATION_LABEL_LOGOUT' | translate}}</span></a>
                 </li>
             </ul>
+            <div class="reg-header-left fr" style="padding: 18px 13px 0px 0px;">
+                <a style="color: cornsilk;" href="https://ehospital-helpdesk.on.spiceworks.com/portal/">HelpDesk</a>
+            </div>
         </div>
 </header>
