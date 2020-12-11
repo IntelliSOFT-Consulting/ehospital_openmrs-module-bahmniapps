@@ -6,8 +6,16 @@ This repository acts as the front end for the **Bahmni EMR**. It is compeltely w
 
 
 # Build
-
-Please visit https://bahmni.atlassian.net/wiki/display/BAH/Working+on+Bahmni+OpenMRS+frontend for detailed instructions on **building** and **deploying** the front end
+cd ehospital_openmrs-module-bahmniapps/ui
+1. yarn install
+2. npm install
+3. bower install
+4. grunt clean -DskipTests
+5. grunt --force
+6. ssh to vagrant
+7. sudo mv /var/www/bahmniapps /var/www/bahmniapps-original
+8. sudo ln -s /bahmni/ehospital_openmrs-module-bahmniapps/ui/app /var/www/bahmniapps
+9. sudo chown -h bahmni:bahmni /var/www/bahmniapps
 
 # Project structure
 
