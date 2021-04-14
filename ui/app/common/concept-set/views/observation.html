@@ -199,7 +199,8 @@
                     <div ng-switch-when="text" ng-if="::!observation.isConciseText()">
                         <div ng-if="observation.concept.name !='Mtiba Transaction Number'" ng-include src="'../common/concept-set/views/observationDataTypes/textType.html'"></div>
                         <h3 ng-if="observation.concept.name === 'Mtiba Transaction Number'" ng-include src="'../common/concept-set/views/observationDataTypes/textType.html'"></h3> 
-                        <span ng-if="observation.concept.name === 'Mtiba Transaction Number'"><strong><button ng-click="count = count + 1" ng-init="count=0"> Validate Tx Number.</button></strong></span>
+                        <span ng-if="observation.concept.name === 'Mtiba Transaction Number'"><strong><button ng-click="getMtibaTransacton()" ng-init="count=0"> Validate Tx Number.</button></strong></span>
+                        <span ng-if="observation.concept.name === 'Mtiba Transaction Number'"><strong>{{ mtibaMessage }}</strong></span>
                     </div>
 
                     <div ng-switch-when="text" ng-if="::observation.isConciseText()">
