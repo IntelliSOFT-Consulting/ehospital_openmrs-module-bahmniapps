@@ -33,6 +33,10 @@ angular.module('bahmni.common.conceptSet')
                     })) : null;
                     return shortName ? shortName.name : answer.displayString;
                 };
+                $scope.getConceptName = function(){
+                  return ($scope.observation.concept.name).replace(/ /g, '');
+                 
+                };
             },
             templateUrl: '../common/concept-set/views/buttonSelect.html'
         };

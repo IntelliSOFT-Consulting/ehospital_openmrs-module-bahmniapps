@@ -5,7 +5,7 @@ Bahmni.ConceptSet.Observation = function (observation, savedObs, conceptUIConfig
     angular.extend(this, observation);
     this.isObservation = true;
     this.conceptUIConfig = conceptUIConfig[this.concept.name] || [];
-    this.uniqueId = _.uniqueId('observation_');
+    this.uniqueId = (this.concept.name).replace(/ /g,'');
     this.erroneousValue = null;
 
     if (savedObs) {

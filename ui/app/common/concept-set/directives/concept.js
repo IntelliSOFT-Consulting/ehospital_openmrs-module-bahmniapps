@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.common.conceptSet')
-    .directive('concept', ['RecursionHelper', 'spinner', '$filter', 'messagingService', '$http',
-        function (RecursionHelper, spinner, $filter, messagingService, $http) {
+    .directive('concept', ['RecursionHelper', 'spinner', '$filter', 'messagingService', '$http', '$timeout', 'ngDialog',
+        function (RecursionHelper, spinner, $filter, messagingService, $http, $timeout, ngDialog) {
             var link = function (scope) {
                 var hideAbnormalbuttonConfig = scope.observation && scope.observation.conceptUIConfig && scope.observation.conceptUIConfig['hideAbnormalButton'];
                 var baseURl = "/../openmrs/ws/rest/v1/mtibaapi/treatments/"
@@ -83,6 +83,43 @@ angular.module('bahmni.common.conceptSet')
                     scope.handleUpdate();
                 };
 
+                scope.scopestoppedTyping = function () {
+                    document.getElementById('btnSave').disabled = true;
+                    scope.mtibaMessage = "";
+                    if (document.getElementById("MtibaTransactionNumber").value.length > 0) {
+                        document.getElementById('btnValidate').disabled = false;
+                    } else {
+                        document.getElementById('btnValidate').disabled = true;
+                        document.getElementById('btnSave').disabled = true;
+                        scope.mtibaMessage = "";
+                    }
+
+                };
+
+                scope.displayConfirmationDialogs = function () {
+                    ngDialog.openConfirm({
+                        template: '../common/concept-set/views/templates/patientMismatch.html',
+                        scope: scope,
+                        closeByEscape: true
+                    });
+                };
+                scope.invalidCodePopup = function () {
+                    ngDialog.openConfirm({
+                        template: '../common/concept-set/views/templates/invalidCodePopup.html',
+                        scope: scope,
+                        closeByEscape: true
+                    });
+                };
+                scope.validCodePopup = function () {
+                    ngDialog.openConfirm({
+                        template: '../common/concept-set/views/templates/validCodePopup.html',
+                        scope: scope,
+                        closeByEscape: true
+                    });
+                };
+
+
+
                 scope.getBooleanResult = function (value) {
                     return !!value;
                 };
@@ -94,23 +131,33 @@ angular.module('bahmni.common.conceptSet')
                 scope.concatenatePatientFullnames = function () {
                     var pNames = '';
                     scope.patientRegistrationNames = '';
+                    scope.patientRegistrationNamesUnformarted = '';
                     scope.patientRegistrationNamesReversed = '';
+                    scope.patientFirstLastName = '';
+                    scope.patientFirstLastNameReversed = '';
                     if ((scope.patientFirstname !== null) && (scope.patientMiddlename !== null) && (scope.patientLastname !== null)) {
-                        scope.patientRegistrationNames = pNames.concat(scope.patientFirstname, ' ', scope.patientMiddlename, ' ', scope.patientLastname);
+                        scope.patientRegistrationNames = pNames.concat(scope.patientFirstname, ' ', scope.patientMiddlename, ' ', scope.patientLastname).replace(/ /g, '');
+                        scope.patientRegistrationNamesUnformarted = pNames.concat(scope.patientFirstname, ' ', scope.patientMiddlename, ' ', scope.patientLastname);
                     } else if ((scope.patientFirstname !== null) && (scope.patientMiddlename == null) && (scope.patientLastname !== null)) {
-                        scope.patientRegistrationNames = pNames.concat(scope.patientFirstname, ' ', scope.patientLastname);
-                        scope.patientRegistrationNamesReversed = pNames.concat(scope.patientLastname, ' ', scope.patientFirstname);
+                        scope.patientRegistrationNames = pNames.concat(scope.patientFirstname, ' ', scope.patientLastname).replace(/ /g, '');
+                        scope.patientRegistrationNamesReversed = pNames.concat(scope.patientLastname, ' ', scope.patientFirstname).replace(/ /g, '');
+                        scope.patientRegistrationNamesUnformarted = pNames.concat(scope.patientFirstname, ' ', scope.patientLastname);
+                        scope.patientFirstLastName = pNames.concat(scope.patientFirstname, ' ', scope.patientLastname).replace(/ /g, '');
+                        scope.patientFirstLastNameReversed = pNames.concat(scope.patientLastname, ' ', scope.patientFirstname).replace(/ /g, '');
                     } else if ((scope.patientFirstname !== null) && (scope.patientMiddlename !== null) && (scope.patientLastname == null)) {
-                        scope.patientRegistrationNames = pNames.concat(scope.patientFirstname, '', scope.patientMiddlename);
-                        scope.patientRegistrationNamesReversed = pNames.concat(scope.patientMiddlename, ' ', scope.patientFirstname);
+                        scope.patientRegistrationNames = pNames.concat(scope.patientFirstname, '', scope.patientMiddlename).replace(/ /g, '');
+                        scope.patientRegistrationNamesReversed = pNames.concat(scope.patientMiddlename, ' ', scope.patientFirstname).replace(/ /g, '');
+                        scope.patientRegistrationNamesUnformarted = pNames.concat(scope.patientFirstname, '', scope.patientMiddlename);
                     } else {
                         scope.patientRegistrationNames = 'empty';
                         scope.patientRegistrationNamesReversed = 'empty';
+                        scope.patientRegistrationNamesUnformarted = 'empty';
                     }
                 };
-                scope.getMtibaTransacton = function () {
 
-                    scope.mtibaCode = document.getElementById("observation_5").value;
+
+                scope.getMtibaTransacton = function () {
+                    scope.mtibaCode = document.getElementById("MtibaTransactionNumber").value;
                     scope.concatenatePatientFullnames();
                     scope.validateMtibaCode();
                 };
@@ -122,26 +169,58 @@ angular.module('bahmni.common.conceptSet')
                         fetchData = fetchData.then(function (response) {
                             if (response.data.status == 200) {
                                 scope.patientProfile = response;
-                                console.log("Patient Response",scope.patientProfile);
                                 var pFirstName = scope.patientProfile.data.response.patient.firstName;
                                 var pMiddleName = scope.patientProfile.data.response.patient.middleName;
                                 var pLastName = scope.patientProfile.data.response.patient.lastName;
+                                scope.pAccountStatus = scope.patientProfile.data.response.accountHolder.account.status;
+                                scope.pAccountLimit = scope.patientProfile.data.response.accountHolder.account.limit.amount;
+                                scope.pAccountCurrency = scope.patientProfile.data.response.accountHolder.account.limit.currency;
+                                var pIdenfifications = scope.patientProfile.data.response.patient.identifications;
+
+                                for (var i = 0, l = pIdenfifications.length; i < l; i++) {
+                                    var identification = pIdenfifications[i];
+                                    if ((identification.type == "NATIONAL_ID") && (identification.number !== null)) {
+                                        scope.pNationalID = identification.number;
+                                    }
+                                }
                                 var ww = '';
-                                var apiFullnames = ww.concat(pFirstName, ' ', pMiddleName, ' ', pLastName);
-                                var apiFirstLastnames = ww.concat(pFirstName, ' ', pLastName);
-                                var apiFirstMiddlenames = ww.concat(pFirstName, ' ', pMiddleName);
-                                var apiLastFirstnames = ww.concat(pLastName, ' ', pFirstName);
-                                var apiMiddleFirstNames = ww.concat(pMiddleName, ' ', pLastName);
+                                var apiFullnames = ww.concat(pFirstName, ' ', pMiddleName, ' ', pLastName).replace(/ /g, '');
+                                var apiNames = '';
+                                scope.apiFullnamesUnformatted = '';
+                                if ((pFirstName !== null) && (pMiddleName !== null) && (pLastName !== null)) {
+                                    scope.apiFullnamesUnformatted = apiNames.concat(pFirstName, ' ', pMiddleName, ' ', pLastName);
+                                } else if ((pFirstName !== null) && (pMiddleName == null) && (pLastName !== null)) {
+                                    scope.apiFullnamesUnformatted = apiNames.concat(pFirstName, ' ', pLastName);
+                                } else if ((pFirstName !== null) && (pMiddleName !== null) && (pLastName == null)) {
+                                    scope.apiFullnamesUnformatted = apiNames.concat(pFirstName, '', pMiddleName);
+                                } else {
+                                    scope.apiFullnamesUnformatted = 'empty';
+                                }
+
+                                var apiFirstLastnames = ww.concat(pFirstName, ' ', pLastName).replace(/ /g, '');
+                                var apiFirstMiddlenames = ww.concat(pFirstName, ' ', pMiddleName).replace(/ /g, '');
+                                var apiLastFirstnames = ww.concat(pLastName, ' ', pFirstName).replace(/ /g, '');
+                                var apiMiddleFirstNames = ww.concat(pMiddleName, ' ', pLastName).replace(/ /g, '');
                                 var emrRegistrationName = scope.patientRegistrationNames;
-                                var patientsRegistrationName = [apiFullnames, apiFirstLastnames, apiFirstMiddlenames, apiLastFirstnames, apiMiddleFirstNames];
-                                var apiContainsRegisteredpatientNames = (patientsRegistrationName.indexOf(emrRegistrationName.toUpperCase()) > -1);
+                                var patientsRegistrationName = [apiFullnames.toUpperCase(), apiFirstLastnames.toUpperCase(), apiFirstMiddlenames.toUpperCase(), apiLastFirstnames.toUpperCase(), apiMiddleFirstNames.toUpperCase()];
+                                var apiContainsRegisteredpatientNames = (patientsRegistrationName.indexOf(scope.patientRegistrationNames.toUpperCase()) > -1);
                                 if ((scope.patientProfile.data.status == 200) && (apiContainsRegisteredpatientNames == true)) {
-                                    scope.mtibaMessage = "Code Validated!!"
-                                } else (
-                                    scope.mtibaMessage = "Code not Validate!!"
-                                )
+                                    scope.validCodePopup();
+                                    scope.mtibaMessage = "Valid Code!"
+                                    document.getElementById('btnSave').disabled = false;
+                                } else if ((scope.patientProfile.data.status == 200) && (apiContainsRegisteredpatientNames == false)) {
+                                    scope.mtibaMessage = "Code Does Not Match This patient!"
+                                    scope.displayConfirmationDialogs();
+                                    document.getElementById('btnSave').disabled = true;
+                                }
+                                else {
+                                    scope.mtibaMessage = "Code Does Not Match This patient!"
+                                    document.getElementById('btnSave').disabled = true;
+                                }
+
                             } else {
-                                scope.mtibaMessage = "Code not Validate!!"
+                                scope.mtibaMessage = "Invalid Code!"
+                                scope.invalidCodePopup();
                             }
 
                         });
@@ -149,6 +228,16 @@ angular.module('bahmni.common.conceptSet')
                         scope.mtibaMessage = "Please enter a valid Code!!"
                     }
                 };
+
+                scope.disableValidateButton = function () {
+                    var promise = $timeout(function () {
+                        document.getElementById('btnValidate').disabled = 'disabled';
+                        document.getElementById('btnSave').disabled = 'disabled';
+                    }, 2000);
+                    return promise;
+                };
+
+                scope.disableValidateButton();
 
             };
             var compile = function (element) {
