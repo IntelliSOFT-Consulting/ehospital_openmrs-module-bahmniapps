@@ -1,0 +1,33 @@
+<div class="revise-refill-modal-wrapper" aria-labelledby="dialog-label">
+    <!--Added to override the z-index property of the top navigation bar. It is done to prevent any user action
+    when the popup is shown-->
+    <style type="text/css">
+        .opd-header-wrapper {
+            z-index: 10000 !important;
+        }
+
+        p {
+            text-align: left;
+        }
+    </style>
+    <div class="dialog-button-group">
+        <h3>
+            <p style="color:rgb(247, 43, 7); text-align:center">Patient's Name Mismatch:</p>
+        </h3>
+        <span>
+            <p>E-hospital Registration Names :
+                <strong> {{ patientRegistrationNamesUnformarted }} </strong>
+        </span>
+        <span>
+            <p>Mtiba Registration Names :
+                <strong> {{ apiFullnamesUnformatted }} </strong>
+        </span>
+        <span>
+            <p>National ID :
+                <strong> {{ pNationalID }} </strong>  
+        </span>
+    </div>
+    <span class="ngdialog-end"></span>
+</div>
+
+
