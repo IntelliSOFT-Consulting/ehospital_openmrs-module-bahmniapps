@@ -70,7 +70,23 @@ angular.module('bahmni.common.conceptSet')
                     scope.collapse = scope.collapseInnerSections && scope.collapseInnerSections.value;
                 });
 
+                scope.EnableSaveButton = function () {
+
+                    if ((scope.observation.concept.name == "Registered on Mtiba") && (scope.observation.value !== undefined)){
+                        if((scope.observation.value.name.display== "False")){
+                            document.getElementById('btnSave').disabled = false;
+                        } else {
+                            document.getElementById('btnSave').disabled = true;
+                        } 
+                    }
+                    if((scope.observation.value == undefined)){
+                        document.getElementById('btnSave').disabled = true;
+                    } 
+                 };
+
+
                 scope.handleUpdate = function () {
+                    scope.EnableSaveButton();
                     scope.$root.$broadcast("event:observationUpdated-" + scope.conceptSetName, scope.observation.concept.name, scope.rootObservation);
                 };
 
@@ -228,15 +244,19 @@ angular.module('bahmni.common.conceptSet')
                         scope.mtibaMessage = "Please enter a valid Code!!"
                     }
                 };
-
+                 
                 scope.disableValidateButton = function () {
                     var promise = $timeout(function () {
-                        document.getElementById('btnValidate').disabled = 'disabled';
-                        document.getElementById('btnSave').disabled = 'disabled';
-                    }, 2000);
+                        if(document.getElementById('btnValidate') !== null){
+                            document.getElementById('btnValidate').disabled = 'disabled';
+                            document.getElementById('btnSave').disabled = 'disabled';
+                        }
+                        if(document.getElementById('btnSave') !==null){
+                            document.getElementById('btnSave').disabled = true;
+                        }    
+                    }, 1000);
                     return promise;
                 };
-
                 scope.disableValidateButton();
 
             };
