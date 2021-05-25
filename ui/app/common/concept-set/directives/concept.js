@@ -72,17 +72,17 @@ angular.module('bahmni.common.conceptSet')
 
                 scope.EnableSaveButton = function () {
 
-                    if ((scope.observation.concept.name == "Registered on Mtiba") && (scope.observation.value !== undefined)){
-                        if((scope.observation.value.name.display== "False")){
+                    if ((scope.observation.concept.name == "Registered on Mtiba") && (scope.observation.value !== undefined)) {
+                        if ((scope.observation.value.name.display == "False")) {
                             document.getElementById('btnSave').disabled = false;
                         } else {
                             document.getElementById('btnSave').disabled = true;
-                        } 
+                        }
                     }
-                    if((scope.observation.value == undefined)){
+                    if ((scope.observation.value == undefined)) {
                         document.getElementById('btnSave').disabled = true;
-                    } 
-                 };
+                    }
+                };
 
 
                 scope.handleUpdate = function () {
@@ -244,16 +244,16 @@ angular.module('bahmni.common.conceptSet')
                         scope.mtibaMessage = "Please enter a valid Code!!"
                     }
                 };
-                 
+
                 scope.disableValidateButton = function () {
                     var promise = $timeout(function () {
-                        if(document.getElementById('btnValidate') !== null){
+                        if (document.getElementById('btnValidate') !== null) {
                             document.getElementById('btnValidate').disabled = 'disabled';
                             document.getElementById('btnSave').disabled = 'disabled';
                         }
-                        if(document.getElementById('btnSave') !==null){
+                        if (document.getElementById('btnSave') !== null) {
                             document.getElementById('btnSave').disabled = true;
-                        }    
+                        }
                     }, 1000);
                     return promise;
                 };
