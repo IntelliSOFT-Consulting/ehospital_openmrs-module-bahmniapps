@@ -27,7 +27,7 @@ html{
 }
 
 body {
-  font-family: $OpenSansFont, Arial, sans-serif;
+  font-family: $OpenSansFont;
   -webkit-font-smoothing: subpixel-antialiased;
   background: $bahmniPageBg;
   color: $text;
@@ -38,7 +38,7 @@ body {
     background: none;
     margin: 0;
     padding: 0;
-    font-family: $OpenSansFont, Arial, sans-serif;
+    font-family: $OpenSansFont;
     font-size: 14px;
   }
 }
