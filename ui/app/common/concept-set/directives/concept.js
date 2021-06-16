@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('bahmni.common.conceptSet')
-    .directive('concept', ['RecursionHelper', 'spinner', '$filter', 'messagingService', '$http', '$timeout', 'ngDialog',
-        function (RecursionHelper, spinner, $filter, messagingService, $http, $timeout, ngDialog) {
+    .directive('concept', ['RecursionHelper', 'spinner', '$filter', 'messagingService', 'providerService', '$http', '$timeout', 'ngDialog',
+        function (RecursionHelper, spinner, $filter, messagingService, providerService, $http, $timeout, ngDialog) {
             var link = function (scope) {
                 var hideAbnormalbuttonConfig = scope.observation && scope.observation.conceptUIConfig && scope.observation.conceptUIConfig['hideAbnormalButton'];
                 var baseURl = "/../openmrs/ws/rest/v1/mtibaapi/treatments/"
@@ -244,6 +244,54 @@ angular.module('bahmni.common.conceptSet')
                         scope.mtibaMessage = "Please enter a valid Code!!"
                     }
                 };
+
+                var mapProvider = function (result) {
+                    scope.providers =  _.map(result.data.results, function (provider) {
+                        var response = {
+                            value: provider.display || provider.person.display,
+                            uuid: provider.uuid,
+                            identifier: provider.identifier
+                        };
+                        return response;
+                    });
+                    return scope.providers;
+                };
+
+                scope.getProviders = function (params) {
+                    if (params !== undefined) {
+                        return providerService.search(params.term).then(mapProvider);
+                    }
+                };
+
+                scope.responseMap = function (data) {
+                    return _.map(data, function (providerInfo) {
+                        providerInfo.label = data.value;
+                        providerInfo.identifier = data.identifier;
+                        return providerInfo;
+                    });
+                };
+
+                scope.mapProviderToUuid = function (providerInfo) {
+                    if (scope.observation.value !== providerInfo.uuid) {
+                        scope.observation.value = providerInfo.uuid;
+                    }
+                };
+
+                scope.valChange = function (params) {
+                    angular.forEach(scope.providers, function(value, key) {
+                        if(value.value.includes(params)){
+                            scope.observation.value = value.uuid;
+                        }
+                    });
+                };
+
+                scope.isCustomConceptType = function (conceptName) {
+                    var customConceptTypes = [
+                        "Mtiba Transaction Number",
+                        "Assigned Visit Provider"
+                    ]
+                    return customConceptTypes.indexOf(conceptName) !== -1;
+                }
 
                 scope.disableValidateButton = function () {
                     var promise = $timeout(function () {
