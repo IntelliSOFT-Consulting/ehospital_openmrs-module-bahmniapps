@@ -197,7 +197,19 @@
                     </div>
 
                     <div ng-switch-when="text" ng-if="::!observation.isConciseText()">
-                        <div ng-if="observation.concept.name !='Mtiba Transaction Number'" ng-include src="'../common/concept-set/views/observationDataTypes/textType.html'"></div>
+                        <div class="autocomplete" ng-if="observation.concept.name === 'Assigned Visit Provider'" >
+
+                            <input ng-model="observation.providerLabel" type="text" name="name"
+                                   ng-value="name"
+                                   bahmni-autocomplete
+                                   source="getProviders"
+                                   response-map="responseMap"
+                                   on-select="mapProviderToUuid"
+                                   ng-change="valChange(observation.value)"
+                            />
+
+                        </div>
+                        <div ng-if="::!isCustomConceptType(observation.concept) && observation.concept.name != 'Assigned Visit Provider'" ng-include src="'../common/concept-set/views/observationDataTypes/textType.html'"></div>
                         <h3 ng-if="observation.concept.name === 'Mtiba Transaction Number'" ng-keyup="scopestoppedTyping()" ng-include src="'../common/concept-set/views/observationDataTypes/textType.html'"></h3> 
                         <span ng-if="observation.concept.name === 'Mtiba Transaction Number'"><strong><button id="btnValidate" ng-click="getMtibaTransacton()"> Validate Tx Number.</button></strong></span>
                         <span ng-if="observation.concept.name === 'Mtiba Transaction Number'"><strong>{{ mtibaMessage }}</strong></span>
