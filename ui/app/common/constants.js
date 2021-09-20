@@ -63,7 +63,6 @@ Bahmni.Common = Bahmni.Common || {};
 
     Bahmni.Common.Constants = {
         hostURL: hostUrl,
-        registeredInMtiba : "Registered on Mtiba",
         dateFormat: "dd/mm/yyyy",
         dateDisplayFormat: "DD-MMM-YYYY",
         timeDisplayFormat: "hh:mm",
