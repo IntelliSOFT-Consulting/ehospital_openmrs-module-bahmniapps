@@ -70,23 +70,7 @@ angular.module('bahmni.common.conceptSet')
                     scope.collapse = scope.collapseInnerSections && scope.collapseInnerSections.value;
                 });
 
-                scope.EnableSaveButton = function () {
-
-                    if ((scope.observation.concept.name == "Registered on Mtiba") && (scope.observation.value !== undefined)) {
-                        if ((scope.observation.value.name.display == "False")) {
-                            document.getElementById('btnSave').disabled = false;
-                        } else {
-                            document.getElementById('btnSave').disabled = true;
-                        }
-                    }
-                    if ((scope.observation.value == undefined)) {
-                        document.getElementById('btnSave').disabled = true;
-                    }
-                };
-
-
                 scope.handleUpdate = function () {
-                    scope.EnableSaveButton();
                     scope.$root.$broadcast("event:observationUpdated-" + scope.conceptSetName, scope.observation.concept.name, scope.rootObservation);
                 };
 
@@ -97,19 +81,6 @@ angular.module('bahmni.common.conceptSet')
                         scope.observation.value = value;
                     }
                     scope.handleUpdate();
-                };
-
-                scope.scopestoppedTyping = function () {
-                    document.getElementById('btnSave').disabled = true;
-                    scope.mtibaMessage = "";
-                    if (document.getElementById("MtibaTransactionNumber").value.length > 0) {
-                        document.getElementById('btnValidate').disabled = false;
-                    } else {
-                        document.getElementById('btnValidate').disabled = true;
-                        document.getElementById('btnSave').disabled = true;
-                        scope.mtibaMessage = "";
-                    }
-
                 };
 
                 scope.displayConfirmationDialogs = function () {
@@ -140,113 +111,8 @@ angular.module('bahmni.common.conceptSet')
                     return !!value;
                 };
 
-                scope.patientFirstname = scope.patient.givenName;
-                scope.patientMiddlename = scope.patient.middleName;
-                scope.patientLastname = scope.patient.familyName;
-
-                scope.concatenatePatientFullnames = function () {
-                    var pNames = '';
-                    scope.patientRegistrationNames = '';
-                    scope.patientRegistrationNamesUnformarted = '';
-                    scope.patientRegistrationNamesReversed = '';
-                    scope.patientFirstLastName = '';
-                    scope.patientFirstLastNameReversed = '';
-                    if ((scope.patientFirstname !== null) && (scope.patientMiddlename !== null) && (scope.patientLastname !== null)) {
-                        scope.patientRegistrationNames = pNames.concat(scope.patientFirstname, ' ', scope.patientMiddlename, ' ', scope.patientLastname).replace(/ /g, '');
-                        scope.patientRegistrationNamesUnformarted = pNames.concat(scope.patientFirstname, ' ', scope.patientMiddlename, ' ', scope.patientLastname);
-                    } else if ((scope.patientFirstname !== null) && (scope.patientMiddlename == null) && (scope.patientLastname !== null)) {
-                        scope.patientRegistrationNames = pNames.concat(scope.patientFirstname, ' ', scope.patientLastname).replace(/ /g, '');
-                        scope.patientRegistrationNamesReversed = pNames.concat(scope.patientLastname, ' ', scope.patientFirstname).replace(/ /g, '');
-                        scope.patientRegistrationNamesUnformarted = pNames.concat(scope.patientFirstname, ' ', scope.patientLastname);
-                        scope.patientFirstLastName = pNames.concat(scope.patientFirstname, ' ', scope.patientLastname).replace(/ /g, '');
-                        scope.patientFirstLastNameReversed = pNames.concat(scope.patientLastname, ' ', scope.patientFirstname).replace(/ /g, '');
-                    } else if ((scope.patientFirstname !== null) && (scope.patientMiddlename !== null) && (scope.patientLastname == null)) {
-                        scope.patientRegistrationNames = pNames.concat(scope.patientFirstname, '', scope.patientMiddlename).replace(/ /g, '');
-                        scope.patientRegistrationNamesReversed = pNames.concat(scope.patientMiddlename, ' ', scope.patientFirstname).replace(/ /g, '');
-                        scope.patientRegistrationNamesUnformarted = pNames.concat(scope.patientFirstname, '', scope.patientMiddlename);
-                    } else {
-                        scope.patientRegistrationNames = 'empty';
-                        scope.patientRegistrationNamesReversed = 'empty';
-                        scope.patientRegistrationNamesUnformarted = 'empty';
-                    }
-                };
-
-
-                scope.getMtibaTransacton = function () {
-                    scope.mtibaCode = document.getElementById("MtibaTransactionNumber").value;
-                    scope.concatenatePatientFullnames();
-                    scope.validateMtibaCode();
-                };
-                scope.validateMtibaCode = function () {
-                    if (scope.mtibaCode !== null) {
-                        var fetchData = $http.get(baseURl + scope.mtibaCode, {
-                            withCredentials: true
-                        });
-                        fetchData = fetchData.then(function (response) {
-                            if (response.data.status == 200) {
-                                scope.patientProfile = response;
-                                var pFirstName = scope.patientProfile.data.response.patient.firstName;
-                                var pMiddleName = scope.patientProfile.data.response.patient.middleName;
-                                var pLastName = scope.patientProfile.data.response.patient.lastName;
-                                scope.pAccountStatus = scope.patientProfile.data.response.accountHolder.account.status;
-                                scope.pAccountLimit = scope.patientProfile.data.response.accountHolder.account.limit.amount;
-                                scope.pAccountCurrency = scope.patientProfile.data.response.accountHolder.account.limit.currency;
-                                var pIdenfifications = scope.patientProfile.data.response.patient.identifications;
-
-                                for (var i = 0, l = pIdenfifications.length; i < l; i++) {
-                                    var identification = pIdenfifications[i];
-                                    if ((identification.type == "NATIONAL_ID") && (identification.number !== null)) {
-                                        scope.pNationalID = identification.number;
-                                    }
-                                }
-                                var ww = '';
-                                var apiFullnames = ww.concat(pFirstName, ' ', pMiddleName, ' ', pLastName).replace(/ /g, '');
-                                var apiNames = '';
-                                scope.apiFullnamesUnformatted = '';
-                                if ((pFirstName !== null) && (pMiddleName !== null) && (pLastName !== null)) {
-                                    scope.apiFullnamesUnformatted = apiNames.concat(pFirstName, ' ', pMiddleName, ' ', pLastName);
-                                } else if ((pFirstName !== null) && (pMiddleName == null) && (pLastName !== null)) {
-                                    scope.apiFullnamesUnformatted = apiNames.concat(pFirstName, ' ', pLastName);
-                                } else if ((pFirstName !== null) && (pMiddleName !== null) && (pLastName == null)) {
-                                    scope.apiFullnamesUnformatted = apiNames.concat(pFirstName, '', pMiddleName);
-                                } else {
-                                    scope.apiFullnamesUnformatted = 'empty';
-                                }
-
-                                var apiFirstLastnames = ww.concat(pFirstName, ' ', pLastName).replace(/ /g, '');
-                                var apiFirstMiddlenames = ww.concat(pFirstName, ' ', pMiddleName).replace(/ /g, '');
-                                var apiLastFirstnames = ww.concat(pLastName, ' ', pFirstName).replace(/ /g, '');
-                                var apiMiddleFirstNames = ww.concat(pMiddleName, ' ', pLastName).replace(/ /g, '');
-                                var emrRegistrationName = scope.patientRegistrationNames;
-                                var patientsRegistrationName = [apiFullnames.toUpperCase(), apiFirstLastnames.toUpperCase(), apiFirstMiddlenames.toUpperCase(), apiLastFirstnames.toUpperCase(), apiMiddleFirstNames.toUpperCase()];
-                                var apiContainsRegisteredpatientNames = (patientsRegistrationName.indexOf(scope.patientRegistrationNames.toUpperCase()) > -1);
-                                if ((scope.patientProfile.data.status == 200) && (apiContainsRegisteredpatientNames == true)) {
-                                    scope.validCodePopup();
-                                    scope.mtibaMessage = "Valid Code!"
-                                    document.getElementById('btnSave').disabled = false;
-                                } else if ((scope.patientProfile.data.status == 200) && (apiContainsRegisteredpatientNames == false)) {
-                                    scope.mtibaMessage = "Code Does Not Match This patient!"
-                                    scope.displayConfirmationDialogs();
-                                    document.getElementById('btnSave').disabled = true;
-                                }
-                                else {
-                                    scope.mtibaMessage = "Code Does Not Match This patient!"
-                                    document.getElementById('btnSave').disabled = true;
-                                }
-
-                            } else {
-                                scope.mtibaMessage = "Invalid Code!"
-                                scope.invalidCodePopup();
-                            }
-
-                        });
-                    } else {
-                        scope.mtibaMessage = "Please enter a valid Code!!"
-                    }
-                };
-
                 var mapProvider = function (result) {
-                    scope.providers =  _.map(result.data.results, function (provider) {
+                    scope.providers = _.map(result.data.results, function (provider) {
                         var response = {
                             value: provider.display || provider.person.display,
                             uuid: provider.uuid,
@@ -278,8 +144,8 @@ angular.module('bahmni.common.conceptSet')
                 };
 
                 scope.valChange = function (params) {
-                    angular.forEach(scope.providers, function(value, key) {
-                        if(value.value.includes(params)){
+                    angular.forEach(scope.providers, function (value, key) {
+                        if (value.value.includes(params)) {
                             scope.observation.value = value.uuid;
                         }
                     });
@@ -287,25 +153,10 @@ angular.module('bahmni.common.conceptSet')
 
                 scope.isCustomConceptType = function (conceptName) {
                     var customConceptTypes = [
-                        "Mtiba Transaction Number",
                         "Assigned Visit Provider"
                     ]
                     return customConceptTypes.indexOf(conceptName) !== -1;
                 }
-
-                scope.disableValidateButton = function () {
-                    var promise = $timeout(function () {
-                        if (document.getElementById('btnValidate') !== null) {
-                            document.getElementById('btnValidate').disabled = 'disabled';
-                            document.getElementById('btnSave').disabled = 'disabled';
-                        }
-                        if (document.getElementById('btnSave') !== null) {
-                            document.getElementById('btnSave').disabled = true;
-                        }
-                    }, 1000);
-                    return promise;
-                };
-                scope.disableValidateButton();
 
             };
             var compile = function (element) {
