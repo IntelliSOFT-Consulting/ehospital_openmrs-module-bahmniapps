@@ -79,9 +79,6 @@ angular.module('bahmni.common.conceptSet')
                             document.getElementById('btnSave').disabled = true;
                         }
                     }
-                    if ((scope.observation.value == undefined)) {
-                        document.getElementById('btnSave').disabled = true;
-                    }
                 };
 
 
