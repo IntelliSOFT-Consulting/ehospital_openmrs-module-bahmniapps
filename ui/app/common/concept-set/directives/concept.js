@@ -118,7 +118,7 @@ angular.module('bahmni.common.conceptSet')
                 };
                 scope.invalidCodePopup = function () {
                     ngDialog.openConfirm({
-                        template: '../common/concept-set/views/templates/invalidCodePopup.html',
+                        template: '../common/concept-set/views/templates/unVerifiedCodePopUp.html',
                         scope: scope,
                         closeByEscape: true
                     });
@@ -130,9 +130,13 @@ angular.module('bahmni.common.conceptSet')
                         closeByEscape: true
                     });
                 };
-
-
-
+                scope.inValidCodePopup = function () {
+                    ngDialog.openConfirm({
+                        template: '../common/concept-set/views/templates/invalidCodePopUp.html',
+                        scope: scope,
+                        closeByEscape: true
+                    });
+                };
                 scope.getBooleanResult = function (value) {
                     return !!value;
                 };
@@ -168,7 +172,6 @@ angular.module('bahmni.common.conceptSet')
                     }
                 };
 
-
                 scope.getMtibaTransacton = function () {
                     scope.mtibaCode = document.getElementById("MtibaTransactionNumber").value;
                     scope.concatenatePatientFullnames();
@@ -180,6 +183,7 @@ angular.module('bahmni.common.conceptSet')
                             withCredentials: true
                         });
                         fetchData = fetchData.then(function (response) {
+                            console.log("We are here", response)
                             if (response.data.status == 200) {
                                 scope.patientProfile = response;
                                 var pFirstName = scope.patientProfile.data.response.patient.firstName;
@@ -219,7 +223,6 @@ angular.module('bahmni.common.conceptSet')
                                 var apiContainsRegisteredpatientNames = (patientsRegistrationName.indexOf(scope.patientRegistrationNames.toUpperCase()) > -1);
                                 if ((scope.patientProfile.data.status == 200) && (apiContainsRegisteredpatientNames == true)) {
                                     scope.validCodePopup();
-                                    scope.mtibaMessage = "Valid Code!"
                                     document.getElementById('btnSave').disabled = false;
                                 } else if ((scope.patientProfile.data.status == 200) && (apiContainsRegisteredpatientNames == false)) {
                                     scope.mtibaMessage = "Code Does Not Match This patient!"
@@ -231,11 +234,11 @@ angular.module('bahmni.common.conceptSet')
                                     document.getElementById('btnSave').disabled = true;
                                 }
 
-                            } else {
-                                scope.mtibaMessage = "Invalid Code!"
+                            } else if (response.data.status == 400) {
                                 scope.invalidCodePopup();
+                            } else {
+                                scope.inValidCodePopup();
                             }
-
                         });
                     } else {
                         scope.mtibaMessage = "Please enter a valid Code!!"
@@ -243,7 +246,7 @@ angular.module('bahmni.common.conceptSet')
                 };
 
                 var mapProvider = function (result) {
-                    scope.providers =  _.map(result.data.results, function (provider) {
+                    scope.providers = _.map(result.data.results, function (provider) {
                         var response = {
                             value: provider.display || provider.person.display,
                             uuid: provider.uuid,
@@ -275,8 +278,8 @@ angular.module('bahmni.common.conceptSet')
                 };
 
                 scope.valChange = function (params) {
-                    angular.forEach(scope.providers, function(value, key) {
-                        if(value.value.includes(params)){
+                    angular.forEach(scope.providers, function (value, key) {
+                        if (value.value.includes(params)) {
                             scope.observation.value = value.uuid;
                         }
                     });
